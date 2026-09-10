@@ -26,6 +26,11 @@
     - name: Start the new container on port 3000
       shell: "docker run -d -p 3000:3000 --name holiday-container holiday-app:latest"
 
+    # NEW STEP: Wait 3 seconds for Node.js to initialize
+    - name: Wait for application to initialize
+      pause:
+        seconds: 3
+
     - name: Run a basic health check
       shell: "curl -s http://localhost:3000/health"
       register: curl_output
