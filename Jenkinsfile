@@ -1,66 +1,49 @@
 pipeline {
     agent any
 
-    environment {
-        // הגדרת שם האימג' והמשתמש ב-Docker Hub
-        DOCKER_USER   = 'lotanb'
-        IMAGE_NAME    = 'holiday-app'
-        IMAGE_TAG     = "${BUILD_NUMBER}" // שימוש במספר ה-Build של ג'נקינס כ-Tag מסודר
-        REGISTRY_CRED = 'docker-hub-credentials' // ה-ID של ה-Credentials שנגדיר בג'נקינס
+    triggers {
+        pollSCM('* * * * *') // Checks for Git changes every minute
     }
 
     stages {
-        // שלב 1: משיכת הקוד מ-GitHub (מבוצע אוטומטית ע"י ג'נקינס, אך נהוג לציין)
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                checkout scm
+                echo 'Checking out code from GitHub repository automatically...'
+                checkout scm 
             }
         }
 
-        // שלב 2: התקנת תלויות (Dependencies)
         stage('Install Dependencies') {
             steps {
-                echo 'Installing npm dependencies...'
-                sh 'npm install'
+                echo 'Installing dependencies directly on Jenkins...'
+                sh 'npm install' // החלפנו ל-install רגיל כמו שהאפליקציה הזו דורשת
             }
         }
 
-        // שלב 3: בדיקת האפליקציה (בדיקת סינטקס בסיסית מאחר ואין קובץ טסטים)
-        stage('Test Application') {
+        stage('Test') {
             steps {
-                echo 'Running syntax check / basic test...'
-                sh 'node --check server.js'
+                echo 'Running application syntax validation test...'
+                sh 'node --check server.js' // מאחר ואין npm test באפליקציה הזו, הבדיקה הזו מוודאת שהקוד תקין ולא קורס
             }
         }
 
-        // שלב 4 & 5: בניית ה-Docker Image ותיוג שלו
-        stage('Build & Tag Docker Image') {
+        stage('Build image') {
             steps {
-                echo "Building Docker image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:latest ."
+                echo "Building Docker image for build #${BUILD_NUMBER}..."
+                // בניית האימג' המקומי בדיוק כמו שלמדתם בכיתה, רק עם שם האפליקציה הנוכחית
+                sh 'docker build -t holiday-app:${BUILD_NUMBER} -t holiday-app:latest .'
             }
         }
 
-        // שלב 6: דחיפת ה-Image ל-Container Registry (Docker Hub)
-        stage('Push to Docker Hub') {
-            steps {
-                // שימוש ב-Credentials של ג'נקינס לצורך לוגין מאובטח (כדי לא לחשוף סיסמאות ב-GitHub)
-                withCredentials([usernamePassword(credentialsId: "${REGISTRY_CRED}", usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
-                    sh "docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker push ${DOCKER_USER}/${IMAGE_NAME}:latest"
-                }
-            }
-        }
+        // בפרויקט הנוכחי ג'נקינס מסיים כאן! הוא בנה את האימג' ומכין אותו עבור Ansible.
     }
-
+    
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'The Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Check logs for details.'
+            echo 'The Pipeline failed!'
         }
     }
 }
