@@ -4,9 +4,16 @@
   become: yes
 
   tasks:
-    - name: Pull the latest local image
-      shell: "docker pull holiday-app:latest"
-      ignore_errors: yes
+    - name: Clean up existing project directory if it exists
+      file:
+        path: "/home/lotan/holidayevent"
+        state: absent
+
+    - name: Clone the latest code from GitHub directly onto the VM
+      shell: "git clone https://github.com /home/lotan/holidayevent"
+
+    - name: Build the Docker image directly inside the VM
+      shell: "docker build -t holiday-app:latest /home/lotan/holidayevent"
 
     - name: Stop old container if running
       shell: "docker stop holiday-container"
