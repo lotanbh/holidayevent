@@ -1,0 +1,31 @@
+---
+- name: Deploy Holiday Events Application
+  hosts: deployment_servers
+  become: yes # להריץ עם sudo פשוט בשרת
+
+  tasks:
+    # 1. משיכת ה-Image המעודכן מ-Docker Hub
+    - name: Pull the latest docker image
+      shell: "docker pull lotanb/holiday-app:latest"
+
+    # 2. עצירה והסרה של הקונטיינר הקודם (אם הוא קיים)
+    - name: Stop old container if running
+      shell: "docker stop holiday-container"
+      ignore_errors: yes # אם אין קונטיינר רץ, הפקודה תיכשל אבל אנחנו רוצים ש-Ansible ימשיך בכל זאת
+
+    - name: Remove old container if exists
+      shell: "docker rm holiday-container"
+      ignore_errors: yes # כנ"ל, להמשיך גם אם לא היה קונטיינר קיים
+
+    # 3. הפעלת הקונטיינר החדש וחשיפת פורט 3000
+    - name: Start the new container
+      shell: "docker run -d -p 3000:3000 --name holiday-container lotanb/holiday-app:latest"
+
+    # 4. חלק 7: בדיקת תקינות מהירה (Health Check) מהשרת עצמו עם curl פשוט
+    - name: Run a basic health check
+      shell: "curl -s http://localhost:3000/health"
+      register: curl_output
+
+    - name: Show health check response
+      debug:
+        msg: "Server response: {{ curl_output.stdout }}"
