@@ -10,7 +10,7 @@
         state: absent
 
     - name: Clone the latest code from GitHub directly onto the VM
-      shell: "git clone https://github.com /home/lotan/holidayevent"
+      shell: "git clone https://github.com/lotanbh/holidayevent.git /home/lotan/holidayevent"
 
     - name: Build the Docker image directly inside the VM
       shell: "docker build -t holiday-app:latest /home/lotan/holidayevent"
