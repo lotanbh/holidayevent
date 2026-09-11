@@ -31,10 +31,13 @@
       pause:
         seconds: 3
 
-    - name: Run a basic health check
+    - name: Run a strict health check
       shell: "curl -s http://localhost:3000/health"
       register: curl_output
+      # This forces Ansible to fail if the response doesn't contain "healthy"
+      failed_when: "'healthy' not in curl_output.stdout"
 
     - name: Show health check response
       debug:
-        msg: "Server response: {{ curl_output.stdout }}"
+        msg: "Server response is valid and running: {{ curl_output.stdout }}"
+
