@@ -37,10 +37,12 @@ pipeline {
         // FULL AUTOMATION (PART 6): Triggering Ansible automatically
         stage('Deploy with Ansible') {
             steps {
-                echo 'Triggering Ansible Deployment Playbook automatically...'
-                sh 'ansible-playbook -i inventory.ini deploy.yml'
+                echo 'Triggering Ansible Deployment Playbook safely with Vault...'
+                // We added the vault password file and included the secrets file
+                sh 'ansible-playbook -i inventory.ini deploy.yml --vault-password-file .vault_pass -e @secrets.yml'
             }
         }
+
     }
     
     post {
