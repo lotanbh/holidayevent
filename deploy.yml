@@ -16,7 +16,10 @@
       shell: "docker build -t holiday-app:latest /home/lotan/holidayevent"
 
     - name: Deploy application using Docker Compose (Bonus Task)
-      shell: "docker compose --file /home/lotan/holidayevent/docker-compose.yml up -d --build"
+      shell: "docker compose up -d --build"
+      args:
+        chdir: "/home/lotan/holidayevent"
+
 
     # - name: Stop old container if running
     #   shell: "docker stop holiday-container"
