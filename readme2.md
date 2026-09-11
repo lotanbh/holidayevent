@@ -57,12 +57,24 @@ pipeline {
         }
         stage('Deploy with Ansible') {
             steps {
-                sh 'ansible-playbook -i inventory.ini deploy.yml'
+                echo 'Triggering Ansible Deployment Playbook safely with Vault...'
+                sh 'ansible-playbook -i inventory.ini deploy.yml --vault-password-file .vault_pass -e @secrets.yml'
             }
         }
+
     }
 }
 ```
+
+---
+
+## 🛡️ Security & Secret Management (Ansible Vault)
+
+To comply with real-world DevOps best practices, this project does **not** hardcode plain-text passwords or SSH keys inside the code or inventory files. 
+
+1. **Encrypted Secrets (`secrets.yml`):** All sensitive infrastructure credentials (like the target server's SSH and sudo passwords) are stored inside an encrypted YAML file utilizing **Ansible Vault**.
+2. **Automated Decryption (`.vault_pass`):** The Jenkins pipeline uses a local, non-interactive password file to securely unlock the vault at runtime.
+3. **Repository Protection (`.gitignore`):** The decryption key `.vault_pass` is strictly excluded via `.gitignore` to guarantee that no plain-text passwords are ever pushed to the public GitHub repository.
 
 ---
 
