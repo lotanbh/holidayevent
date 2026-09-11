@@ -10,27 +10,21 @@
         state: absent
 
     - name: Clone the latest code from GitHub directly onto the VM
-      shell: "git clone https://github.com/lotanbh/holidayevent.git /home/lotan/holidayevent"
+      shell: "git clone https://github.com /home/lotan/holidayevent"
 
     - name: Build the Docker image directly inside the VM
       shell: "docker build -t holiday-app:latest /home/lotan/holidayevent"
 
-    - name: Deploy application using Docker Compose (Bonus Task)
-      shell: "docker compose up -d --build"
-      args:
-        chdir: "/home/lotan/holidayevent"
+    - name: Stop old container if running
+      shell: "docker stop holiday-container"
+      ignore_errors: yes
 
+    - name: Remove old container if exists
+      shell: "docker rm holiday-container"
+      ignore_errors: yes
 
-    # - name: Stop old container if running
-    #   shell: "docker stop holiday-container"
-    #   ignore_errors: yes
-
-    # - name: Remove old container if exists
-    #   shell: "docker rm holiday-container"
-    #   ignore_errors: yes
-
-    # - name: Start the new container on port 3000
-    #   shell: "docker run -d -p 3000:3000 --name holiday-container holiday-app:latest"
+    - name: Start the new container on port 3000
+      shell: "docker run -d -p 3000:3000 --name holiday-container holiday-app:latest"
 
     # NEW STEP: Wait 3 seconds for Node.js to initialize
     - name: Wait for application to initialize
@@ -46,4 +40,3 @@
     - name: Show health check response
       debug:
         msg: "Server response is valid and running: {{ curl_output.stdout }}"
-
