@@ -24,7 +24,7 @@
       ignore_errors: yes
 
     - name: Start the new container on port 3000
-      shell: "docker run -d -p 3000:3000 --name holiday-container holiday-app:latest"
+      shell: "docker run -d -p 3000:3000 --restart always --name holiday-container holiday-app:latest"
 
     # NEW STEP: Wait 3 seconds for Node.js to initialize
     - name: Wait for application to initialize
@@ -34,7 +34,6 @@
     - name: Run a strict health check
       shell: "curl -s http://localhost:3000/health"
       register: curl_output
-      # This forces Ansible to fail if the response doesn't contain "healthy"
       failed_when: "'healthy' not in curl_output.stdout"
 
     - name: Show health check response
