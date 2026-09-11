@@ -47,10 +47,11 @@ pipeline {
     
     post {
         success {
-            echo 'The entire CI/CD Pipeline completed successfully!'
+            echo '📢 SYSTEM NOTIFICATION: CI/CD Pipeline Completed Successfully! New version is live.'
         }
         failure {
-            echo 'The Pipeline failed!'
+            echo '🚨 SYSTEM NOTIFICATION: CI/CD Pipeline Failed! Deployment aborted.'
         }
     }
+
 }
